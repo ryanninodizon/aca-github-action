@@ -1,0 +1,43 @@
+name: Trigger auto deployment for webapi-ryani
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ main ]
+    paths:
+    - '**'
+    - '.github/workflows/webapi-ryani-AutoDeployTrigger-69aaee2b-a087-42bb-8119-d6779c8197af.yml'
+
+  # Allow manual trigger 
+  workflow_dispatch:
+      
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.WEBAPIRYANI_AZURE_CREDENTIALS }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          appSourcePath: ${{ github.workspace }} 
+          registryUrl: ca4a168484e2acr.azurecr.io
+          registryUsername: ${{ secrets.WEBAPIRYANI_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.WEBAPIRYANI_REGISTRY_PASSWORD }}
+          containerAppName: webapi-ryani
+          resourceGroup: rg-aca-demo-01
+          imageToBuild: ca4a168484e2acr.azurecr.io/webapi-ryani:${{ github.sha }}
+          
+            
+
+     
+
